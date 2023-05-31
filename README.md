@@ -4,30 +4,21 @@ SU est une abréviation de "Schéma unitaire"
 
 # **Summary:**
 
-- [Actionneurs](#actionneurs)
-- [Capteurs](#capteurs)
-- [Cartes](#cartes)
-- [Composants](#composants)
-- [Autres](#autres)
+- [Programmation](#programmation)
+- [Electronique](#electronique)
+- [Mecanique](#mecanique)
 
 ---
 
-## **Actionneurs:**
+### **Programmation:**
+
+- [Capteurs](/Capteurs/)
+- [Actionneurs](/Actionneurs/)
+---
+
+### **Electronique:**
 
 ---
 
-## **Capteurs:**
+### **Mécanique:**
 
----
-
-## **Cartes:**
-
----
-
-## **Composants:**
-
----
-
-## **Autres:**
-
----
