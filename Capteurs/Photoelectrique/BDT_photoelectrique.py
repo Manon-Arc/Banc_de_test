@@ -3,7 +3,7 @@ import time
 import math
 from bmi088 import BMI088
 
-def BDT(PIN1, PIN2):
+def photoelectrique(pin1, pin2):
     i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
     devices = i2c.scan()
     print('I2C devices found:', devices)
