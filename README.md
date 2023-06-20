@@ -18,7 +18,9 @@ SU est une abréviation de "Schéma unitaire"
 
 ### **Electronique:**
 
----
+- [schematics + assembly](/elec/)
+- [shema_unitaire](/shema_unitaire/)
 
 ### **Mécanique:**
 
+---
