@@ -1,28 +1,33 @@
 from platform import machine
-
 from aiohttp import Fingerprint
-from machine import Pin, PWM, ADC, i2c
+from machine import Pin, PWM, ADC, I2C, UART 
 from time import sleep, sleep_ms, sleep_us, ticks_us
 import tm1637
 import esp_rgb_lcd_grove
 import neopixel
 import pypot.dynamixel as dynamixel
 import serial
-
+import Adafruit_DHT
+import bme280
+import sys
+import ssd1306
+import lsm6dso
+import math
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from pypot.dynamixel.conversion import dynamixelModels
 from pypot.dynamixel import DxlIO, Dxl320IO, get_available_ports
 from pypot.utils import flushed_print as print
-import sys
-import ssd1306
 from fingerprint3 import Fingerprint3
 from MPU6050 import MPU6050
-import lsm6dso
+from mpu9250 import MPU9250
+from onewire import OneWire
+from ds18x20 import DS18X20
+from as7341 import AS7341
 
 
 class TestClass:
     melody = []
-    
+
     def sept_segments(PinIn, PinOut):
         try:
             tm= tm1637.TM1637(PinIn, PinOut)
@@ -266,11 +271,11 @@ class TestClass:
 
     def oled(pin1, pin2):
         try:
-            i2c = machine.I2C(-1, machine.Pin(pin1), machine.Pin(pin2))
+            I2C = machine.I2C(-1, machine.Pin(pin1), machine.Pin(pin2))
             DISPLAY_ADDR = 0x3C
             DISPLAY_WIDTH = 128
             DISPLAY_HEIGHT = 128
-            display = ssd1306.SSD1306_I2C(DISPLAY_WIDTH, DISPLAY_HEIGHT, i2c, DISPLAY_ADDR)
+            display = ssd1306.SSD1306_I2C(DISPLAY_WIDTH, DISPLAY_HEIGHT, I2C, DISPLAY_ADDR)
             display.fill(0)
             display.show()
             display.text("HelloWorld ", 0, 0)
@@ -282,8 +287,8 @@ class TestClass:
 
     def fingerprint(self, pin1, pin2):
         try:
-            i2c = self.I2C(scl=Pin(pin1), sda=Pin(pin2))
-            fingerprint = Fingerprint3(i2c)
+            I2C = I2C(scl=Pin(pin1), sda=Pin(pin2))
+            fingerprint = Fingerprint3(I2C)
             fingerprint.initialize()
             while True:
                 print("\nSelect an option:")
@@ -353,8 +358,8 @@ class TestClass:
     
     def accelerometr(self, pin1, pin2):
         try:
-            i2c = self.I2C(scl=Pin(pin1), sda=Pin(pin2)) 
-            intertial_sensor = lsm6dso.LSM6DSO(i2c) # Instanciation du capteur
+            I2C = I2C(scl=Pin(pin1), sda=Pin(pin2)) 
+            intertial_sensor = lsm6dso.LSM6DSO(I2C) # Instanciation du capteur
             intertial_sensor.scale_g('2000') # Moindre sensibilité pour les mesures angulaires
             intertial_sensor.scale_a('2g') # Sensibilité maximum pour les mesures d'accélérations
             while True:
@@ -377,34 +382,197 @@ class TestClass:
             print("Program interrupted by user")
 
     def init_camera(self):
-        i2c.writeto(self.camera_address, b'\x56\x00')
+        I2C.writeto(self.camera_address, b'\x56\x00')
         sleep(1)
-        i2c.writeto(self.camera_address, b'\x56\x36\x01\x00')
+        I2C.writeto(self.camera_address, b'\x56\x36\x01\x00')
         sleep(1)
-        i2c.writeto(self.camera_address, b'\x56\x31\x05\x00')
+        I2C.writeto(self.camera_address, b'\x56\x31\x05\x00')
         sleep(1)
 
 
     def capture_photo(self):
-        i2c.writeto(self.camera_address, b'\x56\x36\x01\x00')
+        I2C.writeto(self.camera_address, b'\x56\x36\x01\x00')
         sleep(1)
         
-        i2c.writeto(self.camera_address, b'\x56\x34\x01\x00')
+        I2C.writeto(self.camera_address, b'\x56\x34\x01\x00')
         sleep(1)
-        data = i2c.readfrom(self.camera_address, 0x32)
+        data = I2C.readfrom(self.camera_address, 0x32)
         with open('photo.jpg', 'wb') as file:
             file.write(data)
         print("Photo captured and saved!")
 
     def camera(self, pin1, pin2):
-        i2c = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
+        I2C = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
         self.init_camera()
         self.capture_photo()
         camera_address = 0x30
 
+    def humidity_sensor(pin):
+        try:
+            # capteur DHT11 ou DHT22
+            sensor = Adafruit_DHT.DHT11
+            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+            if humidity is not None and temperature is not None:
+                print('Humidité : {0:.2f}%'.format(humidity))
+                print('Température : {0:.2f}°C'.format(temperature))
+            else:
+                print('error')
+
+        except Exception as e:
+            print('Erreur:', str(e))
+
+    
+    def IMU(pin1, pin2):
+        I2C = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
+        devices = I2C.scan()
+        print('I2C devices found:', devices)
+        imu = MPU9250(I2C)
+        while True:
+            accel = imu.acceleration
+            gyro = imu.gyro
+            mag = imu.magnetic
+            print('Accelerometer (m/s^2):', accel)
+            print('Gyroscope (rad/s):', gyro)
+            print('Magnetometer (uT):', mag)
+            roll = math.atan2(accel[1], accel[2]) * 180 / math.pi
+            pitch = math.atan2(-accel[0], math.sqrt(accel[1]**2 + accel[2]**2)) * 180 / math.pi
+            print('Roll:', roll)
+            print('Pitch:', pitch)
+            sleep(0.1)
 
 
-        
+    def joystick(vrx, vry, sw):
+        try:
+            vrx = ADC(Pin(vrx))
+            vry = ADC(Pin(vry))
+            sw = Pin(sw, Pin.IN, Pin.PULL_UP)
+            while True:
+                print("X : " + str(vrx.read()))
+                print("Y : " + str(vry.read()))
+                print("SW : " + str(sw.value()))
+                sleep(1)
+                if 780 >= vrx >= 750:
+                    print("Haut")
+                if 280 >= vrx >= 240:
+                    print("Bas")
+                if 780 >= vry >= 750:
+                    print("Gauche")
+                if 280 >= vry >= 240:
+                    print("Droite")
+                if vrx >= 1000:
+                    print("test")
+        except KeyboardInterrupt:
+            print("Program interrupted by user")  
 
 
-                
+    def micro(data):
+        try:
+            pin_microphone = Pin(data)
+            while True:
+                valeur_microphone = pin_microphone.value()  # Lire la valeur du capteur sonore
+                if valeur_microphone == 0:
+                    print("Pas de son détecté")
+                else:
+                    print("Son détecté")
+                sleep(0.1)  # Attendre 100ms avant de recommencer la boucle 
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+
+    def pression(pin1, pin2):
+        try:
+            I2C = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
+            devices = I2C.scan()
+            print('I2C devices found:', devices)
+            bme = bme280.BME280(I2C=I2C)
+
+            while True:
+                temperature = bme.temperature
+                humidity = bme.humidity
+                pressure = bme.pressure
+                print('Temperature (C):', temperature)
+                print('Humidity (%):', humidity)
+                print('Pressure (hPa):', pressure)
+                sleep(1)
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+    
+
+    def proximite_capacitif(data):
+        try:
+            sensor = Pin(data)
+            while True:
+                if sensor :
+                    print("metaux présent")
+                else:
+                    print("nothing")
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+
+    def read_RFID_data(self, pin):
+        try:
+            uart = UART(pin, 9600)
+            uart.init(9600, bits=8, parity=None, stop=1, tx=25, rx=26)
+            while True:
+                if uart.any() > 0:
+                    donnee_tag = uart.readline()
+                    print("Donnees tag RFID :            ", donnee_tag)
+
+                    rfid_hexa = ""
+                    for i in range(5, 11):
+                        rfid_hexa += chr(donnee_tag[i])
+                    print("Identifiant RFID en hexa :    ", rfid_hexa)
+
+                    rfid = str(int(rfid_hexa, 16))
+                    while len(rfid) < 10:
+                        rfid = "0" + rfid
+                    print("Identifiant RFID en decimal : ", rfid)
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+
+    def sonde_thermique(pin):
+        try:
+            ow = OneWire(machine.Pin(pin))  
+            ds = DS18X20(ow)
+            devices = ds.scan()
+            print('DS18B20 devices found:', devices)
+            while True:
+                ds.convert_temp()
+                sleep_ms(750)
+                temperatures = []
+                for device in devices:
+                    temp = ds.read_temp(device)
+                    temperatures.append(temp)
+                for i, temp in enumerate(temperatures):
+                    print('Sensor', i + 1, 'Temperature:', temp, '°C')
+                sleep(1)
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+
+    def spectrometre(pin1, pin2):
+        i2c = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
+        devices = i2c.scan()
+        print('I2C devices found:', devices)
+        as7341 = AS7341(i2c)
+        as7341.setup(mode=AS7341.MODE_1)
+        while True:
+            spectral_data = as7341.get_spectral_data()
+            print('Spectral Data:', spectral_data)
+            sleep(1)
+
+
+    def bouton_poussoir(pin):
+        try:
+            button = Pin(pin)
+            while True:
+                if button.value() == 1:
+                    print("bp pressed")
+                else:
+                    print("bp not pressed")
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+
