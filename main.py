@@ -29,6 +29,9 @@ class TestClass:
     melody = []
 
     def sept_segments(PinIn, PinOut):
+        """
+        La fonction permet d'afficher un message sur un afficheur 7 segments
+        """
         try:
             tm= tm1637.TM1637(PinIn, PinOut)
             str = 'Hello World!'
@@ -46,6 +49,9 @@ class TestClass:
  
         
     def buzzer(PinIn, PinOut):
+        """
+        La fonction permet de faire sonner un buzzer
+        """
         try:
             buzzer=Pin(PinIn,PinOut)
             while True:
@@ -58,6 +64,11 @@ class TestClass:
 
 
     def lcd(PinIn, PinOut):
+        """
+        La fonction permet d'afficher un message sur l'écran LCD
+        les paramètres PinIn et PinOut correspondent aux pins SCL et SDA
+        la fonction renvoie le message "Hello World" sur l'écran LCD
+        """
         try:
             lcd = esp_rgb_lcd_grove.esp_rgb_lcd(PinIn, PinOut)
             lcd.clear()
@@ -78,6 +89,10 @@ class TestClass:
             
     
     def electroaimant(PinIn, PinOut):
+        """
+        La fonction permet d'activer ou de désactiver un électroaimant
+        les paramètres PinIn et PinOut correspondent aux pins de l'électroaimant
+        """
         try:
             button = Pin(PinIn)
             aimant=Pin(PinOut,Pin.OUT)
@@ -98,6 +113,10 @@ class TestClass:
 
 
     def haut_parleur(PinIn, PinOut):
+        """
+        La fonction permet de jouer une mélodie
+        les paramètres PinIn et PinOut correspondent aux pins du haut-parleur
+        """
         try:
             pwm = PWM(Pin(PinIn, PinOut))
             notes = {
@@ -123,6 +142,9 @@ class TestClass:
 
 
     def bouton_poussoir(PinIn, PinOut):
+        """
+        La fonction permet de lire l'état d'un bouton poussoir
+        """
         try:
             bp_1 = Pin(PinIn, PinOut)
             while True:
@@ -135,6 +157,9 @@ class TestClass:
 
     
     def led(PinIn):
+        """
+        La fonction permet d'allumer une LED
+        """
         try:
             # Initialisation de la LED (avec paramètre de luminosité)
             pixels = neopixel.NeoPixel(PinIn, brightness = 0.2, auto_write = False, pixel_order = neopixel.GRB)
@@ -153,6 +178,10 @@ class TestClass:
             print("Program interrupted by user")
 
     def brushless(pin):
+        """
+        La fonction permet de faire tourner un moteur brushless
+        le paramètre Pin correspond à la pin du moteur 
+        """
         try:
             motor = PWM(Pin(Pin),freq=50)
             duty_cycle = 50 # Between 0 - 100 %
@@ -163,6 +192,10 @@ class TestClass:
             print("Program interrupted by user")
 
     def DC_motor(Pin):
+        """
+        La fonction permet de faire tourner un moteur à courant continu
+        le paramètre Pin correspond à la pin du moteur
+        """
         try:
             motor = PWM(Pin(Pin),freq=50)
             duty_cycle = 50 # Between 0 - 100 %
@@ -173,6 +206,11 @@ class TestClass:
             print("Program interrupted by user")
 
     def stepper_motor(Pin1, Pin2, Pin3, Pin4):
+        """
+        La fonction permet de faire tourner un moteur pas à pas
+        les paramètres Pin1, Pin2, Pin3 et Pin4 correspondent aux pins du moteur
+        la fonction renvoie la rotation du moteur
+        """
         try:
             pins = [Pin(Pin1, Pin.OUT), Pin(Pin2, Pin.OUT), Pin(Pin3, Pin.OUT), Pin(Pin4, Pin.OUT)]
             sequence = [[1, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [0, 0, 1, 1], [0, 0, 0, 1], [1, 0, 0, 1]]
@@ -186,11 +224,15 @@ class TestClass:
             print("Program interrupted by user")
 
     def potentiometre(Pin):
+        """
+        La fonction permet de lire les données du potentiomètre
+        le paramètre pin correspond à la pin du potentiomètre
+        la fonction renvoie la valeur du potentiomètre
+        """
         try:
             can = ADC(Pin(Pin)) 
             can.atten(ADC.ATTN_11DB)         # étendue totale : 3.3V
             ADC.width(ADC.WIDTH_10BIT)       # change la résolution du convertisseur à 10bits
-
             while True:
                 pot = can.read()        # conversion analogique-numérique 0-1023
                 print("CAN =", pot)     # affichage sur la console REPL de la valeur numérique
@@ -199,6 +241,11 @@ class TestClass:
             print("Program interrupted by user")
 
     def ultrason(trig, echo):
+        """
+        la fonction permet de lire les données du capteur ultrason
+        les paramètres trig et echo correspondent aux pins trig et echo du capteur
+        la fonction renvoie la distance entre le capteur et l'objet détecté
+        """
         try:
             trigger = Pin(trig, Pin.OUT)
             echo = Pin(echo, Pin.IN)
@@ -217,13 +264,16 @@ class TestClass:
             print("Program interrupted by user")
 
     def dynamixel(Pin):
+        """
+        La fonction permet de lire les données du moteur dynamixel
+        le paramètre pin correspond à la pin du moteur
+        """
         try:
             ser = serial.Serial("COM4", 1000000)
             if not ser.isOpen():
                 ser.open()
             serial_port = "COM4"
             print(serial_port)
-
             motors = []
             # Wait for the motor to "reboot..."
             for _ in range(10):
@@ -245,6 +295,10 @@ class TestClass:
 
  
     def servo_moteur(pwm):
+        """
+        La fonction permet de faire tourner un servo moteur
+        le paramètre pwm correspond à la pin du servo moteur
+        """
         try:
             p = Pin(13)
             servo = PWM(p,freq=50)
@@ -259,6 +313,11 @@ class TestClass:
 
 
     def IR(out):
+        """
+        La fonction permet de lire les données du capteur infrarouge
+        le paramètre out correspond à la pin du capteur
+        la fonction renvoie si un objet est détecté ou non
+        """
         try:
             ir = Pin(Pin, out)
             while True:
@@ -270,6 +329,12 @@ class TestClass:
             print("Program interrupted by user")
 
     def oled(pin1, pin2):
+        """
+        La fonction permet d'afficher un message sur l'écran OLED
+        les paramètres pin1 et pin2 correspondent aux pins SCL et SDA
+        la fonction renvoie le message "HelloWorld" puis "Test" sur l'écran OLED
+        la fonction fonctionne en I2C
+        """
         try:
             I2C = machine.I2C(-1, machine.Pin(pin1), machine.Pin(pin2))
             DISPLAY_ADDR = 0x3C
@@ -286,6 +351,14 @@ class TestClass:
 
 
     def fingerprint(self, pin1, pin2):
+        """ 
+        La fonction permet de lire les données du capteur d'empreintes digitales en I2C
+        les paramètres pin1 et pin2 correspondent aux pins SCL et SDA
+        la fonction renvoie si l'empreinte est reconnue ou non:
+        - si l'empreinte est reconnue, le message "Fingerprint verified" s'affiche
+        - si l'empreinte n'est pas reconnue, le message "Fingerprint not verified" s'affiche
+        la fonction fonctionne en I2C
+        """
         try:
             I2C = I2C(scl=Pin(pin1), sda=Pin(pin2))
             fingerprint = Fingerprint3(I2C)
@@ -305,6 +378,9 @@ class TestClass:
 
 
     def enroll_fingerprint():
+        """
+        La fonction permet d'enregistrer une empreinte digitale
+        """
         print("Place your finger on the sensor...")
         while not Fingerprint.read_image():
             sleep_ms(200)
@@ -342,6 +418,14 @@ class TestClass:
 
 
     def gyroscope_sensor(scl_pin, sda_pin):
+        """
+        La fonction permet de lire les données du gyroscope en I2C
+        les paramètres scl_pin et sda_pin correspondent aux pins SCL et SDA
+        la fonction renvoie les données de l'accéléromètre et du gyroscope :
+        - rotation selon les 3 axes
+            - gx, gy, gz
+        ...
+        """
         try:
             mpu = MPU6050(scl_pin, sda_pin)
             mpu.dmp_initialize()
@@ -356,7 +440,15 @@ class TestClass:
             print("Program interrupted by user")
 
     
-    def accelerometr(self, pin1, pin2):
+    def accelerometre(self, pin1, pin2):
+        """
+        La fonction permet de lire les données de l'accelelromètre en I2C
+        les paramètres pin1 et pin2 correspondent aux pins SCL et SDA
+        la fonction renvoie les données de l'accéléromètre et du gyroscope :
+        - accélération selon les 3 axes
+            - ax, ay, az
+        ...
+        """
         try:
             I2C = I2C(scl=Pin(pin1), sda=Pin(pin2)) 
             intertial_sensor = lsm6dso.LSM6DSO(I2C) # Instanciation du capteur
@@ -382,6 +474,9 @@ class TestClass:
             print("Program interrupted by user")
 
     def init_camera(self):
+        """
+        cette fonction permet d'initialiser la caméra
+        """
         I2C.writeto(self.camera_address, b'\x56\x00')
         sleep(1)
         I2C.writeto(self.camera_address, b'\x56\x36\x01\x00')
@@ -391,9 +486,11 @@ class TestClass:
 
 
     def capture_photo(self):
+        """
+        Cette fonction permet de capturer une photo avec la caméra
+        """
         I2C.writeto(self.camera_address, b'\x56\x36\x01\x00')
         sleep(1)
-        
         I2C.writeto(self.camera_address, b'\x56\x34\x01\x00')
         sleep(1)
         data = I2C.readfrom(self.camera_address, 0x32)
@@ -402,12 +499,22 @@ class TestClass:
         print("Photo captured and saved!")
 
     def camera(self, pin1, pin2):
+        """
+        La fonction permet de lire les données de la caméra en I2C
+        les paramètres pin1 et pin2 correspondent aux pins SCL et SDA
+        la fonction renvoie une photo prise par la caméra
+        """
         I2C = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
         self.init_camera()
         self.capture_photo()
         camera_address = 0x30
 
     def humidity_sensor(pin):
+        """
+        La fonction permet de lire les données du capteur d'humidité
+        le paramètre pin correspond à la pin du capteur
+        la fonction renvoie l'humidité et la température    
+        """
         try:
             # capteur DHT11 ou DHT22
             sensor = Adafruit_DHT.DHT11
@@ -423,25 +530,42 @@ class TestClass:
 
     
     def IMU(pin1, pin2):
-        I2C = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
-        devices = I2C.scan()
-        print('I2C devices found:', devices)
-        imu = MPU9250(I2C)
-        while True:
-            accel = imu.acceleration
-            gyro = imu.gyro
-            mag = imu.magnetic
-            print('Accelerometer (m/s^2):', accel)
-            print('Gyroscope (rad/s):', gyro)
-            print('Magnetometer (uT):', mag)
-            roll = math.atan2(accel[1], accel[2]) * 180 / math.pi
-            pitch = math.atan2(-accel[0], math.sqrt(accel[1]**2 + accel[2]**2)) * 180 / math.pi
-            print('Roll:', roll)
-            print('Pitch:', pitch)
-            sleep(0.1)
+        """
+        La fonction permet de lire les données du capteur IMU en I2C
+        le paramètre pin1 correspond à la pin SCL
+        le paramètre pin2 correspond à la pin SDA
+        la fonction renvoie les données de l'accéléromètre, du gyroscope et du magnétomètre
+        """
+        try:
+            I2C = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
+            devices = I2C.scan()
+            print('I2C devices found:', devices)
+            imu = MPU9250(I2C)
+            while True:
+                accel = imu.acceleration
+                gyro = imu.gyro
+                mag = imu.magnetic
+                print('Accelerometer (m/s^2):', accel)
+                print('Gyroscope (rad/s):', gyro)
+                print('Magnetometer (uT):', mag)
+                roll = math.atan2(accel[1], accel[2]) * 180 / math.pi
+                pitch = math.atan2(-accel[0], math.sqrt(accel[1]**2 + accel[2]**2)) * 180 / math.pi
+                print('Roll:', roll)
+                print('Pitch:', pitch)
+                sleep(0.1)
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
 
 
     def joystick(vrx, vry, sw):
+        """
+        la fonction permet de lire les données du joystick
+        les paramètres vrx, vry et sw correspondent aux pins du joystick
+        vrx correspond à l'axe X
+        vry correspond à l'axe Y
+        sw correspond au bouton sous le joystick
+        la fonction renvoie les valeurs des axes X et Y ainsi que l'état du bouton
+        """
         try:
             vrx = ADC(Pin(vrx))
             vry = ADC(Pin(vry))
@@ -466,6 +590,11 @@ class TestClass:
 
 
     def micro(data):
+        """
+        La fonction permet de lire les données du capteur sonore
+        le paramètre data correspond à la pin du capteur
+        la fonction renvoie si un son est détecté ou non
+        """
         try:
             pin_microphone = Pin(data)
             while True:
@@ -480,6 +609,12 @@ class TestClass:
 
 
     def pression(pin1, pin2):
+        """
+        La fonction permet de lire les données du capteur de pression en I2C
+        le paramètre pin1 correspond à la pin SCL
+        le paramètre pin2 correspond à la pin SDA
+        la fonction renvoie la température, l'humidité et la pression
+        """
         try:
             I2C = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
             devices = I2C.scan()
@@ -511,6 +646,12 @@ class TestClass:
 
 
     def read_RFID_data(self, pin):
+        """
+        La fonction permet de lire les données du lecteur RFID
+        le paramètre pin correspond à la pin du lecteur
+        le lecteur fonctionne en UART
+        la fonction renvoie l'identifiant RFID en hexa et en decimal
+        """
         try:
             uart = UART(pin, 9600)
             uart.init(9600, bits=8, parity=None, stop=1, tx=25, rx=26)
@@ -533,6 +674,12 @@ class TestClass:
 
 
     def sonde_thermique(pin):
+        """
+        La fonction permet de lire les données de la sonde thermique
+        le paramètre pin correspond à la pin de la sonde
+        le capteur fonctionne en OneWire
+        la fonction renvoie la température
+        """
         try:
             ow = OneWire(machine.Pin(pin))  
             ds = DS18X20(ow)
@@ -553,6 +700,13 @@ class TestClass:
 
 
     def spectrometre(pin1, pin2):
+        """
+        La fonction permet de lire les données du spectromètre
+        le paramètre pin1 correspond à la pin SCL
+        le paramètre pin2 correspond à la pin SDA
+        le spectrographe fonctionne en I2C
+        la fonction renvoie les données spectrales
+        """
         i2c = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
         devices = i2c.scan()
         print('I2C devices found:', devices)
@@ -563,8 +717,12 @@ class TestClass:
             print('Spectral Data:', spectral_data)
             sleep(1)
 
-
+    
     def bouton_poussoir(pin):
+        """
+        La fonction permet de lire l'état d'un bouton poussoir
+        la fonction renvoie l'état du bouton
+        """
         try:
             button = Pin(pin)
             while True:
@@ -574,5 +732,3 @@ class TestClass:
                     print("bp not pressed")
         except KeyboardInterrupt:
             print("Program interrupted by user")
-
-
