@@ -1,18 +1,23 @@
-from machine import Pin, PWM, ADC
+from platform import machine
+
+from aiohttp import Fingerprint
+from machine import Pin, PWM, ADC, i2c
 from time import sleep, sleep_ms, sleep_us, ticks_us
 import tm1637
 import esp_rgb_lcd_grove
 import neopixel
 import pypot.dynamixel as dynamixel
 import serial
-import math
+
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from pypot.dynamixel.conversion import dynamixelModels
 from pypot.dynamixel import DxlIO, Dxl320IO, get_available_ports
 from pypot.utils import flushed_print as print
 import sys
-import time_pulse_us
-
+import ssd1306
+from fingerprint3 import Fingerprint3
+from MPU6050 import MPU6050
+import lsm6dso
 
 
 class TestClass:
@@ -188,7 +193,7 @@ class TestClass:
         except KeyboardInterrupt:
             print("Program interrupted by user")
 
-    def capteur_ultrason(trig, echo):
+    def ultrason(trig, echo):
         try:
             trigger = Pin(trig, Pin.OUT)
             echo = Pin(echo, Pin.IN)
@@ -248,7 +253,7 @@ class TestClass:
             print("Program interrupted by user")
 
 
-    def capteur_IR(out):
+    def IR(out):
         try:
             ir = Pin(Pin, out)
             while True:
@@ -259,6 +264,147 @@ class TestClass:
         except KeyboardInterrupt:
             print("Program interrupted by user")
 
+    def oled(pin1, pin2):
+        try:
+            i2c = machine.I2C(-1, machine.Pin(pin1), machine.Pin(pin2))
+            DISPLAY_ADDR = 0x3C
+            DISPLAY_WIDTH = 128
+            DISPLAY_HEIGHT = 128
+            display = ssd1306.SSD1306_I2C(DISPLAY_WIDTH, DISPLAY_HEIGHT, i2c, DISPLAY_ADDR)
+            display.fill(0)
+            display.show()
+            display.text("HelloWorld ", 0, 0)
+            display.text("Test", 0, 10)
+            display.show()
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+
+    def fingerprint(self, pin1, pin2):
+        try:
+            i2c = self.I2C(scl=Pin(pin1), sda=Pin(pin2))
+            fingerprint = Fingerprint3(i2c)
+            fingerprint.initialize()
+            while True:
+                print("\nSelect an option:")
+                print("1. Verify fingerprint")
+                print("2. Enroll fingerprint")
+                option = input("Enter your choice (1 or 2): ")
+                if option == '1':
+                    self.verify_fingerprint()
+                elif option == '2':
+                    self.time
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
 
 
 
+    def enroll_fingerprint():
+        print("Place your finger on the sensor...")
+        while not Fingerprint.read_image():
+            sleep_ms(200)
+        Fingerprint.enroll_start(1)
+        print("Remove your finger...")
+        while Fingerprint.read_image():
+            sleep_ms(200)
+        print("Place your finger again...")
+        while not Fingerprint.read_image():
+            sleep_ms(200)
+        if Fingerprint.enroll1() == Fingerprint3.OK:
+            print("First enrollment successful.")
+            print("Remove your finger...")
+            sleep(2)
+            print("Place your finger again...")
+            while not Fingerprint.read_image():
+                sleep_ms(200)
+            if Fingerprint.enroll2() == Fingerprint3.OK:
+                print("Second enrollment successful.")
+                print("Remove your finger...")
+                sleep(2)
+                print("Place your finger again...")
+                while not Fingerprint.read_image():
+                    sleep_ms(200)
+                if Fingerprint.enroll3() == Fingerprint3.OK:
+                    print("Third enrollment successful.")
+                    Fingerprint.store()
+                    print("Fingerprint enrolled.")
+                else:
+                    print("Enrollment failed.")
+            else:
+                print("Enrollment failed.")
+        else:
+            print("Enrollment failed.")
+
+
+    def gyroscope_sensor(scl_pin, sda_pin):
+        try:
+            mpu = MPU6050(scl_pin, sda_pin)
+            mpu.dmp_initialize()
+            print("Gyroscope prêt")
+            while True:
+                accel_data = mpu.get_acceleration()
+                gyro_data = mpu.get_rotation()
+                print("Accélération [x, y, z]:", accel_data)
+                print("Rotation [x, y, z]:", gyro_data)
+                sleep(1)
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+    
+    def accelerometr(self, pin1, pin2):
+        try:
+            i2c = self.I2C(scl=Pin(pin1), sda=Pin(pin2)) 
+            intertial_sensor = lsm6dso.LSM6DSO(i2c) # Instanciation du capteur
+            intertial_sensor.scale_g('2000') # Moindre sensibilité pour les mesures angulaires
+            intertial_sensor.scale_a('2g') # Sensibilité maximum pour les mesures d'accélérations
+            while True:
+                sleep_ms(100)
+                # Mesures des accélérations selon les 3 axes 
+                ax = intertial_sensor.ax()
+                ay = intertial_sensor.ay()
+                az = intertial_sensor.az()
+                # Mesures des angles de rotation selon les 3 axes 
+                gx = intertial_sensor.gx()
+                gy = intertial_sensor.gy()
+                gz = intertial_sensor.gz()
+                print("ax : " + str(ax) + " mg")	
+                print("ay : " + str(ay) + " mg")
+                print("az : " + str(az) + " mg")
+                print("Gx = " + str(gx/1000) + " °/s")
+                print("Gy = " + str(gy/1000) + " °/s")
+                print("Gz = " + str(gz/1000) + " °/s")
+        except KeyboardInterrupt:
+            print("Program interrupted by user")
+
+    def init_camera(self):
+        i2c.writeto(self.camera_address, b'\x56\x00')
+        sleep(1)
+        i2c.writeto(self.camera_address, b'\x56\x36\x01\x00')
+        sleep(1)
+        i2c.writeto(self.camera_address, b'\x56\x31\x05\x00')
+        sleep(1)
+
+
+    def capture_photo(self):
+        i2c.writeto(self.camera_address, b'\x56\x36\x01\x00')
+        sleep(1)
+        
+        i2c.writeto(self.camera_address, b'\x56\x34\x01\x00')
+        sleep(1)
+        data = i2c.readfrom(self.camera_address, 0x32)
+        with open('photo.jpg', 'wb') as file:
+            file.write(data)
+        print("Photo captured and saved!")
+
+    def camera(self, pin1, pin2):
+        i2c = machine.I2C(scl=machine.Pin(pin1), sda=machine.Pin(pin2))
+        self.init_camera()
+        self.capture_photo()
+        camera_address = 0x30
+
+
+
+        
+
+
+                
